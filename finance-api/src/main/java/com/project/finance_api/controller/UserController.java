@@ -5,6 +5,7 @@ import com.project.finance_api.entity.User;
 import com.project.finance_api.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,13 +14,9 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("api/user")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserController {
-    private UserService userService;
-
-//    public UserController(UserService userService) {
-//        this.userService = userService;
-//    }
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {

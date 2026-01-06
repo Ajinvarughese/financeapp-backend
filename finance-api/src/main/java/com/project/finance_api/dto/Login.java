@@ -1,6 +1,7 @@
 package com.project.finance_api.dto;
 
 import com.project.finance_api.enums.LoginType;
+import com.project.finance_api.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,5 +14,5 @@ import lombok.Setter;
 public class Login {
     private String email;
     private String password; // recieves token or password
-    private LoginType loginType;
+    private UserRole role;
 }

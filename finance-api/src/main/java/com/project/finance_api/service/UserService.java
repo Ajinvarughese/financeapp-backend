@@ -32,15 +32,17 @@ public class UserService {
 
     public User getUserByToken(String token) {
         String email = jwtUtil.extractEmail(token);
-        return userRepository.findByEmail(email)
+        User returnUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: "+email));
+        returnUser.setPassword("");
+        return returnUser;
     }
 
-    public String addUser(User user) {
+    public Login addUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(UserRole.USER);
         userRepository.save(user);
-        return jwtUtil.generateToken(user);
+        return new Login("", jwtUtil.generateToken(user), user.getRole());
     }
 
     public String authUserFrequently(Login login) {
@@ -50,12 +52,12 @@ public class UserService {
         return login.getPassword();
     }
 
-    // Get user by email
-    public String authExistingUser(Login login) throws EntityNotFoundException {
+    // Authenticate user by email and password
+    public Login authExistingUser(Login login) throws EntityNotFoundException {
         User findUser = userRepository.findByEmail(login.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: "+login.getEmail()));
         if (passwordEncoder.matches(login.getPassword(), findUser.getPassword())) {
-            return jwtUtil.generateToken(findUser);
+            return new Login("", jwtUtil.generateToken(findUser), findUser.getRole());
         }
         throw new IllegalArgumentException("Wrong credentials");
     }

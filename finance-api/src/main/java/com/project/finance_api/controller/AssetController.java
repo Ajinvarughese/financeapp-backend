@@ -1,6 +1,5 @@
 package com.project.finance_api.controller;
 
-import com.project.finance_api.component.JwtUtil;
 import com.project.finance_api.entity.Asset;
 import com.project.finance_api.entity.User;
 import com.project.finance_api.service.AssetService;

@@ -4,7 +4,6 @@ import com.project.finance_api.dto.Login;
 import com.project.finance_api.entity.User;
 import com.project.finance_api.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

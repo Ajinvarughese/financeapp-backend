@@ -44,7 +44,7 @@ public class LiabilityService {
         existing.setInterest(liability.getInterest());
         existing.setMonths(liability.getMonths());
         existing.setExpense(liability.getExpense());
-        existing.setRiskPercent(liability.getRiskPercent());
+        existing.setRiskClass(liability.getRiskClass());
         existing.setNote(liability.getNote());
 
         return liabillityRepository.save(existing);

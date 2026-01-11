@@ -1,36 +1,30 @@
 package com.project.finance_api.entity;
 
 import com.project.finance_api.component.EntityDetails;
-import com.project.finance_api.enums.RiskClass;
+import com.project.finance_api.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Liability extends EntityDetails {
-
+public class BankStatement extends EntityDetails {
     private String name;
 
-    private Double amount;
+    private LocalDateTime date;
 
-    private Double interest;
-
-    private Integer months;
-
-    private Double expense;
-
-    private String note;
+    private String particular;
 
     @Enumerated(EnumType.STRING)
-    private RiskClass riskClass;
-
-    private String aiResponse;
+    private TransactionType transactionType;
+    private Double amount;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

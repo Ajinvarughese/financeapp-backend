@@ -12,10 +12,8 @@ import lombok.*;
 @Getter
 @Setter
 public class AiChat extends EntityDetails {
-    /* TODO:
-    *   Create Chat bot entity, service and controller
-    *   Look for new entities in frontend
-    */
+
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String text;
 
     @Enumerated(EnumType.STRING)

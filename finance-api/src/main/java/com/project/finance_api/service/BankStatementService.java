@@ -1,6 +1,6 @@
 package com.project.finance_api.service;
 
-import com.project.finance_api.CustomExceptions.DuplicateResourceException;
+import com.project.finance_api.exceptions.DuplicateResourceException;
 import com.project.finance_api.entity.BankStatement;
 import com.project.finance_api.entity.User;
 import com.project.finance_api.repository.BankStatementRepository;

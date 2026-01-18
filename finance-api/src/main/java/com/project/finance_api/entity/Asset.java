@@ -14,8 +14,10 @@ import lombok.Setter;
 @Setter
 public class Asset extends EntityDetails {
 
-    private String source;
+    private String name;
+
     private Double income;
+
     private Double expense;
 
     @ManyToOne

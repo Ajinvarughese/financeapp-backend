@@ -1,5 +1,6 @@
 package com.project.finance_api.service;
 
+import com.project.finance_api.dto.AiDataset;
 import com.project.finance_api.dto.AiPrediction;
 import com.project.finance_api.entity.AiChat;
 import com.project.finance_api.entity.Asset;
@@ -9,6 +10,7 @@ import com.project.finance_api.enums.TextFrom;
 import com.project.finance_api.repository.AssetRepository;
 import com.project.finance_api.repository.LiabillityRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,24 +30,22 @@ public class LiabilityService {
     private final AssetService assetService;
 
     public Liability createLiability(Liability liability) {
+
         List<Asset> existingAssets = assetService.getAssetsByUser(liability.getUser());
-        List<Liability> existingLiabilities = liabillityRepository.findByUserId(liability.getUser().getId());
+        List<Liability> existingLiabilities =
+                liabillityRepository.findByUserId(liability.getUser().getId());
+
+        AiDataset aiDataset = getAiDataset(liability, existingAssets, existingLiabilities);
 
         RestTemplate restTemplate = new RestTemplate();
-        String url = "http://127.0.0.1:8000/ai/liability";
-
-        Map<String, Object> request = new HashMap<>();
-        request.put("assets", existingAssets);
-        request.put("liabilities", existingLiabilities);
-        request.put("newLiability", liability);
+        String url = "http://127.0.0.1:8000/ai/risk";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+        HttpEntity<AiDataset> entity = new HttpEntity<>(aiDataset, headers);
 
         try {
-
             AiPrediction response = restTemplate.postForObject(
                     url,
                     entity,
@@ -57,9 +57,29 @@ public class LiabilityService {
             liability.setRiskClass(response.getRiskClass());
             liability.setAiResponse(response.getDescription());
             return liabillityRepository.save(liability);
+
         } catch (RestClientException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    private static @NonNull AiDataset getAiDataset(Liability liability, List<Asset> existingAssets, List<Liability> existingLiabilities) {
+        double total_assets = 0.0;
+        double total_liability = 0.0;
+        for(Asset userAsset : existingAssets) {
+            total_assets += userAsset.getIncome() - userAsset.getExpense();
+        }
+        for(Liability userLiability : existingLiabilities) {
+            total_liability += userLiability.getAmount() + userLiability.getEmi();
+        }
+
+        return new AiDataset(
+                total_assets,
+                total_liability,
+                liability.getAmount(),
+                liability.getEmi()
+        );
     }
 
 
@@ -85,7 +105,7 @@ public class LiabilityService {
         existing.setAmount(liability.getAmount());
         existing.setInterest(liability.getInterest());
         existing.setMonths(liability.getMonths());
-        existing.setExpense(liability.getExpense());
+        existing.setEmi(liability.getEmi());
         existing.setRiskClass(liability.getRiskClass());
         existing.setNote(liability.getNote());
 

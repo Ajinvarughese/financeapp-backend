@@ -38,7 +38,7 @@ public class AssetService {
     public Asset updateAsset(Long id, Asset asset) {
         Asset existing = getAssetById(id);
 
-        existing.setSource(asset.getSource());
+        existing.setName(asset.getName());
         existing.setIncome(asset.getIncome());
         existing.setExpense(asset.getExpense());
         existing.setDebt(asset.getDebt());

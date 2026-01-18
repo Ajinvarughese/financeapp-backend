@@ -23,13 +23,14 @@ public class Liability extends EntityDetails {
 
     private Integer months;
 
-    private Double expense;
+    private Double emi;
 
     private String note;
 
     @Enumerated(EnumType.STRING)
     private RiskClass riskClass;
 
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String aiResponse;
 
     @ManyToOne

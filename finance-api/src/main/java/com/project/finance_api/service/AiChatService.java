@@ -7,6 +7,7 @@ import com.project.finance_api.entity.Liability;
 import com.project.finance_api.entity.User;
 import com.project.finance_api.enums.TextFrom;
 import com.project.finance_api.repository.AiChatRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,10 +35,12 @@ public class AiChatService {
         aiChatRepository.save(aiChat);
     }
 
+    @Transactional
     public void deleteChat(Long id) {
         aiChatRepository.deleteById(id);
     }
 
+    @Transactional
     public void deleteAllChatsByUserId(Long id) {
         aiChatRepository.deleteByUserId(id);
     }

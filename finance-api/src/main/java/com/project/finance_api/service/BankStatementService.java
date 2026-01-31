@@ -37,7 +37,10 @@ public class BankStatementService {
         return bankStatementRepository.save(bankStatement);
     }
 
-    public List<BankStatement> addStatementFromDoc(MultipartFile file, User user) throws IOException {
+    public List<BankStatement> addStatementFromDoc(
+            MultipartFile file,
+            User user
+    ) throws IOException {
 
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://127.0.0.1:8000/extractPdf";
@@ -48,12 +51,12 @@ public class BankStatementService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        HttpEntity<MultiValueMap<String, Object>> requestEntity =
+        HttpEntity<MultiValueMap<String, Object>> request =
                 new HttpEntity<>(body, headers);
 
         BankStatement[] response = restTemplate.postForObject(
                 url,
-                requestEntity,
+                request,
                 BankStatement[].class
         );
 
@@ -61,36 +64,44 @@ public class BankStatementService {
             return Collections.emptyList();
         }
 
-        List<BankStatement> newStatements = Arrays.asList(response);
+        List<BankStatement> extracted = Arrays.asList(response);
 
-        // Fetch latest existing statement (if any)
-        Optional<BankStatement> lastStatement =
-                bankStatementRepository.findTopByUserOrderByDateDesc(user);
+        /* ---------------- CHECK DUPLICATION ---------------- */
 
-        for (BankStatement statement : newStatements) {
+        int firstNewIndex = -1;
 
-            if (lastStatement.isPresent()) {
-                BankStatement existing = lastStatement.get();
+        for (int i = 0; i < extracted.size(); i++) {
+            BankStatement stmt = extracted.get(i);
 
-                boolean isDuplicate =
-                        statement.getDate().equals(existing.getDate()) &&
-                                statement.getParticular().equals(existing.getParticular()) &&
-                                statement.getAmount().equals(existing.getAmount()) &&
-                                user.getId().equals(existing.getUser().getId());
+            boolean exists = bankStatementRepository
+                    .findByRefNumberAndUser(stmt.getRefNumber(), user)
+                    .isPresent();
 
-                if (isDuplicate) {
-                    throw new DuplicateResourceException(
-                            "Bank statement already uploaded"
-                    );
-                }
+            if (!exists) {
+                firstNewIndex = i;
+                break;
             }
+        }
 
-            statement.setUser(user);
+        // CASE 1: FULL DUPLICATE
+        if (firstNewIndex == -1) {
+            throw new DuplicateResourceException(
+                    "Bank statement already uploaded"
+            );
+        }
+
+        // CASE 2 or 3: PARTIAL / FRESH
+        List<BankStatement> newStatements =
+                extracted.subList(firstNewIndex, extracted.size());
+
+        // attach user
+        for (BankStatement stmt : newStatements) {
+            stmt.setUser(user);
         }
 
         return bankStatementRepository.saveAll(newStatements);
     }
-
+    
     public void deleteStatementByUser(User user) {
         bankStatementRepository.deleteByUser(user);
     }

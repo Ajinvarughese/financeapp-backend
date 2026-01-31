@@ -16,11 +16,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BankStatement extends EntityDetails {
-    private String name;
-
     private LocalDateTime date;
 
     private String particular;
+
+    private String refNumber;
 
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;

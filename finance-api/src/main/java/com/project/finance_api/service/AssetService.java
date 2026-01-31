@@ -41,7 +41,6 @@ public class AssetService {
         existing.setName(asset.getName());
         existing.setIncome(asset.getIncome());
         existing.setExpense(asset.getExpense());
-        existing.setDebt(asset.getDebt());
         existing.setNotes(asset.getNotes());
         existing.setUser(asset.getUser());
 

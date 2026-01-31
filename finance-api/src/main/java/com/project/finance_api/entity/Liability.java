@@ -25,6 +25,7 @@ public class Liability extends EntityDetails {
 
     private Double emi;
 
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String note;
 
     @Enumerated(EnumType.STRING)

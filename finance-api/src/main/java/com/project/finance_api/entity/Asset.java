@@ -18,13 +18,13 @@ public class Asset extends EntityDetails {
 
     private Double income;
 
+    // total amount spent on this asset
     private Double expense;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private Double debt;
-
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String notes;
 }

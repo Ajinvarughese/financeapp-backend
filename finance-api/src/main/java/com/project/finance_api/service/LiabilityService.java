@@ -2,13 +2,11 @@ package com.project.finance_api.service;
 
 import com.project.finance_api.dto.AiDataset;
 import com.project.finance_api.dto.AiPrediction;
-import com.project.finance_api.entity.AiChat;
 import com.project.finance_api.entity.Asset;
 import com.project.finance_api.entity.Liability;
 import com.project.finance_api.entity.User;
-import com.project.finance_api.enums.TextFrom;
-import com.project.finance_api.repository.AssetRepository;
 import com.project.finance_api.repository.LiabillityRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpEntity;
@@ -18,9 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +67,7 @@ public class LiabilityService {
             total_assets += userAsset.getIncome() - userAsset.getExpense();
         }
         for(Liability userLiability : existingLiabilities) {
-            total_liability += userLiability.getAmount() + userLiability.getEmi();
+            total_liability += userLiability.getEmi();
         }
 
         return new AiDataset(
@@ -113,6 +109,7 @@ public class LiabilityService {
     }
 
 
+    @Transactional
     public void deleteLiability(Long id) {
         liabillityRepository.deleteById(id);
     }

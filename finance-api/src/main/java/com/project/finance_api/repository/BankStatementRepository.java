@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface BankStatementRepository extends JpaRepository<BankStatement, Long> {
     List<BankStatement> findByUserId(Long id);
     Optional<BankStatement> findTopByUserOrderByDateDesc(User user);
+    Optional<BankStatement> findByRefNumberAndUser(String refNumber, User user);
     void deleteByUser(User user);
 }

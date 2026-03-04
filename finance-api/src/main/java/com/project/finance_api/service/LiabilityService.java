@@ -5,7 +5,7 @@ import com.project.finance_api.dto.AiPrediction;
 import com.project.finance_api.entity.Asset;
 import com.project.finance_api.entity.Liability;
 import com.project.finance_api.entity.User;
-import com.project.finance_api.repository.LiabillityRepository;
+import com.project.finance_api.repository.LiabilityRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -22,14 +22,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LiabilityService {
 
-    private final LiabillityRepository liabillityRepository;
+    private final LiabilityRepository liabilityRepository;
     private final AssetService assetService;
 
     public Liability createLiability(Liability liability) {
 
         List<Asset> existingAssets = assetService.getAssetsByUser(liability.getUser());
         List<Liability> existingLiabilities =
-                liabillityRepository.findByUserId(liability.getUser().getId());
+                liabilityRepository.findByUserId(liability.getUser().getId());
 
         AiDataset aiDataset = getAiDataset(liability, existingAssets, existingLiabilities);
 
@@ -52,7 +52,7 @@ public class LiabilityService {
 
             liability.setRiskClass(response.getRiskClass());
             liability.setAiResponse(response.getDescription());
-            return liabillityRepository.save(liability);
+            return liabilityRepository.save(liability);
 
         } catch (RestClientException e) {
             throw new RuntimeException(e);
@@ -63,6 +63,7 @@ public class LiabilityService {
     private static @NonNull AiDataset getAiDataset(Liability liability, List<Asset> existingAssets, List<Liability> existingLiabilities) {
         double total_assets = 0.0;
         double total_liability = 0.0;
+
         for(Asset userAsset : existingAssets) {
             total_assets += userAsset.getIncome() - userAsset.getExpense();
         }
@@ -80,17 +81,17 @@ public class LiabilityService {
 
 
     public List<Liability> getAllLiability() {
-        return liabillityRepository.findAll();
+        return liabilityRepository.findAll();
     }
 
 
     public Liability getLiabilityById(Long id) {
-        return liabillityRepository.findById(id)
+        return liabilityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Asset not found"));
     }
 
     public List<Liability> getLiabilityByUser(User user) {
-        return liabillityRepository.findByUserId(user.getId());
+        return liabilityRepository.findByUserId(user.getId());
     }
 
 
@@ -105,13 +106,13 @@ public class LiabilityService {
         existing.setRiskClass(liability.getRiskClass());
         existing.setNote(liability.getNote());
 
-        return liabillityRepository.save(existing);
+        return liabilityRepository.save(existing);
     }
 
 
     @Transactional
     public void deleteLiability(Long id) {
-        liabillityRepository.deleteById(id);
+        liabilityRepository.deleteById(id);
     }
 
 }

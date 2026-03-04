@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface LiabillityRepository extends JpaRepository<Liability, Long> {
+public interface LiabilityRepository extends JpaRepository<Liability, Long> {
     List<Liability> findByUserId(Long id);
 }

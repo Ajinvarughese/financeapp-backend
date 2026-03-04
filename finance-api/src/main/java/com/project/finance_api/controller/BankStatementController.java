@@ -43,7 +43,6 @@ public class BankStatementController {
     public ResponseEntity<BankStatement> addNewStatement(@RequestBody BankStatement statement) {
         return ResponseEntity.ok(bankStatementService.addNewStatement(statement));
     }
-
     @DeleteMapping
     public void deleteStatements(
             @RequestHeader("Authorization") String authHeader) {

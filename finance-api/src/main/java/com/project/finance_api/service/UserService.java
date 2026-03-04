@@ -4,6 +4,7 @@ import com.project.finance_api.component.JwtUtil;
 import com.project.finance_api.dto.Login;
 import com.project.finance_api.entity.User;
 import com.project.finance_api.enums.UserRole;
+import com.project.finance_api.exceptions.DuplicateResourceException;
 import com.project.finance_api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,8 +42,13 @@ public class UserService {
     }
 
     public Login addUser(User user) {
+        Optional<User> exists = userRepository.findByEmail(user.getEmail());
+        if(exists.isPresent()){
+            throw new DuplicateResourceException("User already exists");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(UserRole.USER);
+
         userRepository.save(user);
         return new Login("", jwtUtil.generateToken(user), user.getRole());
     }

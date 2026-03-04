@@ -1,14 +1,18 @@
 package com.project.finance_api.controller;
 
 
+import com.project.finance_api.component.FileUpload;
 import com.project.finance_api.entity.Liability;
 import com.project.finance_api.entity.User;
 import com.project.finance_api.service.LiabilityService;
 import com.project.finance_api.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -17,10 +21,26 @@ import java.util.List;
 public class LiabilityController {
     private final LiabilityService liabilityService;
     private final UserService userService;
+    private final FileUpload fileUpload;
 
-    @PostMapping
-    public ResponseEntity<Liability> createLiability(@RequestBody Liability liability) {
-        return ResponseEntity.ok(liabilityService.createLiability(liability));
+    @PostMapping(
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Liability> createLiability(
+            @RequestPart("liability") Liability liability,
+            @RequestPart(name = "file", required = false) MultipartFile document
+    ) throws IOException {
+
+        Liability newLiability = liabilityService.createLiability(liability);
+
+        if (document != null && !document.isEmpty()) {
+            String fileUrl = fileUpload.uploadFile(document);
+            newLiability.setDocument(fileUrl);
+            newLiability = liabilityService.updateDocumentString(newLiability);
+        }
+
+        return ResponseEntity.ok(newLiability);
     }
 
     @GetMapping

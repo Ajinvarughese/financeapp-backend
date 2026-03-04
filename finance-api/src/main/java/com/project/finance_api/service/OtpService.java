@@ -5,6 +5,8 @@ import com.project.finance_api.exceptions.OtpExpiredException;
 import com.project.finance_api.repository.OtpRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.Optional;
 public class OtpService {
     private final OtpRepository otpRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JavaMailSender mailSender;
 
     public OTP createOTP(OTP otp) {
         String generatedOtp = generateOTP();
@@ -28,21 +31,33 @@ public class OtpService {
             OTP oldOtp = existingOtp.get();
             OTP responseOtp = new OTP(generatedOtp, oldOtp.getEmail());
             oldOtp.setOtp(passwordEncoder.encode(generatedOtp));
+            sendOtp(responseOtp.getOtp(), responseOtp.getEmail());
             otpRepository.save(oldOtp);
             return responseOtp;
         }
 
         OTP responseOtp = new OTP(generatedOtp, otp.getEmail());
         otp.setOtp(passwordEncoder.encode(generatedOtp));
-
+        sendOtp(responseOtp.getOtp(), responseOtp.getEmail());
         otpRepository.save(otp);
         return  responseOtp;
     }
 
+    private void sendOtp(String otp, String email) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Your OTP Code for Financia");
+        message.setText("Your OTP is: \n\n" + otp + "\n\nThis OTP will be valid for 5 minutes.\n\nDo not share it with anyone. If you didn't make this request, you can safely ignore this email.");
+
+        mailSender.send(message);
+    }
+
+    @Transactional
     public OTP validateOTP(OTP otp) {
         OTP existing = otpRepository.findByEmail(otp.getEmail())
                 .orElseThrow(() -> new OtpExpiredException("Otp Expired"));
         if(passwordEncoder.matches(otp.getOtp(), existing.getOtp())) {
+            otpRepository.delete(existing);
             return existing;
         }
         throw new OtpExpiredException("OTP is wrong");

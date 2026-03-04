@@ -25,6 +25,10 @@ public class Liability extends EntityDetails {
 
     private Double emi;
 
+    private String institution;
+
+    private String document;
+
     @Column(columnDefinition = "MEDIUMTEXT")
     private String note;
 

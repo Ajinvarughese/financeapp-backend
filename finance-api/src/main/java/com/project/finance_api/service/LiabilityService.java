@@ -25,6 +25,9 @@ public class LiabilityService {
     private final LiabilityRepository liabilityRepository;
     private final AssetService assetService;
 
+    public Liability updateDocumentString(Liability liability) {
+        return liabilityRepository.save(liability);
+    }
     public Liability createLiability(Liability liability) {
 
         List<Asset> existingAssets = assetService.getAssetsByUser(liability.getUser());

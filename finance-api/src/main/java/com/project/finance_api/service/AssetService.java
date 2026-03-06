@@ -30,8 +30,8 @@ public class AssetService {
                 .orElseThrow(() -> new RuntimeException("Asset not found"));
     }
 
-    public List<Asset> getAssetsByUser(User user) {
-        return assetRepository.findByUserId(user.getId());
+    public List<Asset> getAssetsByUser(Long id) {
+        return assetRepository.findByUserId(id);
     }
 
 

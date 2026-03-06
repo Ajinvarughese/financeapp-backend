@@ -39,7 +39,13 @@ public class AssetController {
 
         String token = authHeader.replace("Bearer ", "").trim();
         User user = userService.getUserByToken(token);
-        return ResponseEntity.ok(assetService.getAssetsByUser(user));
+        return ResponseEntity.ok(assetService.getAssetsByUser(user.getId()));
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<Asset>> getAssetsByUserId(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(assetService.getAssetsByUser(id));
     }
 
     @PutMapping("/{id}")

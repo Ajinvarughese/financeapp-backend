@@ -1,12 +1,16 @@
 package com.project.finance_api.service;
 
 import com.project.finance_api.component.JwtUtil;
+import com.project.finance_api.dto.FullUser;
 import com.project.finance_api.dto.Login;
 import com.project.finance_api.entity.User;
+import com.project.finance_api.enums.AccountStatus;
 import com.project.finance_api.enums.UserRole;
+import com.project.finance_api.exceptions.AccountSuspendedException;
 import com.project.finance_api.exceptions.DuplicateResourceException;
 import com.project.finance_api.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,10 +26,32 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final AssetService assetService;
+    private final LiabilityService liabilityService;
+
 
     //get all user
     public List<User> getAllUser(){
         return userRepository.findAll();
+    }
+
+    public List<FullUser> fetchFullUser() {
+
+        List<User> users = userRepository.findAll();
+
+        return users.stream()
+                .filter(user -> user.getRole() == UserRole.USER)
+                .map(user -> {
+
+                    FullUser fullUser = new FullUser();
+
+                    fullUser.setUser(user);
+                    fullUser.setAssets(assetService.getAssetsByUser(user.getId()));
+                    fullUser.setLiabilities(liabilityService.getLiabilitiesByUser(user.getId()));
+
+                    return fullUser;
+                })
+                .toList();
     }
 
     //get Specific user by id
@@ -35,10 +61,13 @@ public class UserService {
 
     public User getUserByToken(String token) {
         String email = jwtUtil.extractEmail(token);
-        User returnUser = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: "+email));
-        returnUser.setPassword("");
-        return returnUser;
+        if(user.getAccountStatus() == AccountStatus.SUSPENDED) {
+            throw new AccountSuspendedException("Account is temporarily suspended");
+        }
+
+        return user;
     }
 
     public Login addUser(User user) {
@@ -48,22 +77,19 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(UserRole.USER);
-
+        user.setAccountStatus(AccountStatus.ACTIVE);
         userRepository.save(user);
         return new Login("", jwtUtil.generateToken(user), user.getRole());
     }
 
-    public String authUserFrequently(Login login) {
-        String email = jwtUtil.extractEmail(login.getPassword());
-        userRepository.findByEmail(login.getEmail())
-            .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
-        return login.getPassword();
-    }
 
     // Authenticate user by email and password
     public Login authExistingUser(Login login) throws EntityNotFoundException {
         User findUser = userRepository.findByEmail(login.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: "+login.getEmail()));
+        if(findUser.getAccountStatus() == AccountStatus.SUSPENDED) {
+            throw new AccountSuspendedException("Account is temporarily suspended");
+        }
         if (passwordEncoder.matches(login.getPassword(), findUser.getPassword())) {
             return new Login("", jwtUtil.generateToken(findUser), findUser.getRole());
         }
@@ -89,7 +115,19 @@ public class UserService {
         }).orElseThrow(() -> new IllegalArgumentException("User not found with id:"+id));
     }
 
+    public User updateUserStatus(Long id, AccountStatus status) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.setAccountStatus(status);
+                    return userRepository.save(user);
+                })
+                .orElseThrow(() ->
+                        new EntityNotFoundException("User not found with id: " + id)
+                );
+    }
+
     //Delete an user
+    @Transactional
     public void deleteUser(Long id){
         if(!userRepository.existsById(id)){
             throw new EntityNotFoundException();

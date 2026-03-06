@@ -4,7 +4,6 @@ import com.project.finance_api.dto.AiDataset;
 import com.project.finance_api.dto.AiPrediction;
 import com.project.finance_api.entity.Asset;
 import com.project.finance_api.entity.Liability;
-import com.project.finance_api.entity.User;
 import com.project.finance_api.repository.LiabilityRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ public class LiabilityService {
     }
     public Liability createLiability(Liability liability) {
 
-        List<Asset> existingAssets = assetService.getAssetsByUser(liability.getUser());
+        List<Asset> existingAssets = assetService.getAssetsByUser(liability.getUser().getId());
         List<Liability> existingLiabilities =
                 liabilityRepository.findByUserId(liability.getUser().getId());
 
@@ -93,8 +92,8 @@ public class LiabilityService {
                 .orElseThrow(() -> new RuntimeException("Asset not found"));
     }
 
-    public List<Liability> getLiabilityByUser(User user) {
-        return liabilityRepository.findByUserId(user.getId());
+    public List<Liability> getLiabilitiesByUser(Long id) {
+        return liabilityRepository.findByUserId(id);
     }
 
 

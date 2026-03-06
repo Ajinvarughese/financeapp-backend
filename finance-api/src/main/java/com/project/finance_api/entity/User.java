@@ -28,7 +28,6 @@ public class User extends EntityDetails {
 
     private Integer age;
 
-    @Column(updatable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)

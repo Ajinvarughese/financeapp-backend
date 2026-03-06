@@ -48,8 +48,8 @@ public class AiChatService {
 
     public AiChat generateAiResponse(AiChat aiChat) {
 
-        List<Asset> assets = assetService.getAssetsByUser(aiChat.getUser());
-        List<Liability> liabilities = liabilityService.getLiabilityByUser(aiChat.getUser());
+        List<Asset> assets = assetService.getAssetsByUser(aiChat.getUser().getId());
+        List<Liability> liabilities = liabilityService.getLiabilitiesByUser(aiChat.getUser().getId());
         User user = userService.getUserById(aiChat.getUser().getId());
 
         List<AiChat> existingAiChat =

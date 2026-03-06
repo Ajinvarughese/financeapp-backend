@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,9 +29,12 @@ public class LiabilityController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Liability> createLiability(
-            @RequestPart("liability") Liability liability,
+            @RequestPart("liability") String liabilityJson,
             @RequestPart(name = "file", required = false) MultipartFile document
     ) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        Liability liability = mapper.readValue(liabilityJson, Liability.class);
 
         Liability newLiability = liabilityService.createLiability(liability);
 
@@ -54,12 +58,18 @@ public class LiabilityController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<Liability>> getAssetsByUser(
+    public ResponseEntity<List<Liability>> getLiabilityByUser(
             @RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.replace("Bearer ", "").trim();
         User user = userService.getUserByToken(token);
-        return ResponseEntity.ok(liabilityService.getLiabilityByUser(user));
+        return ResponseEntity.ok(liabilityService.getLiabilitiesByUser(user.getId()));
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<Liability>> getLiabilityByUserId(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(liabilityService.getLiabilitiesByUser(id));
     }
 
     @PutMapping("/{id}")

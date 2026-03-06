@@ -1,0 +1,14 @@
+package com.project.finance_api.repository;
+
+import com.project.finance_api.entity.Feedback;
+import com.project.finance_api.enums.FeedbackStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
+    List<Feedback> findByUserId(Long id);
+    void deleteByFeedbackStatus(FeedbackStatus feedbackStatus);
+}

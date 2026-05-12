@@ -24,5 +24,4 @@ public class OtpController {
     public ResponseEntity<OTP> validateOTP(@RequestBody OTP otp) {
         return ResponseEntity.ok(otpService.validateOTP(otp));
     }
-
 }
